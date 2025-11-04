@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Claim Status - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Health Fund Patrol</h1>
+        <nav>
+            <a href="{{ url_for('hospital_staff') }}">Submit Claim</a>
+            <a href="{{ url_for('hospital_claim_status') }}">Claim Status</a>
+            <a href="{{ url_for('hospital_change_password') }}">Change Password</a>
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Claim Status</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% if claims %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Patient ID</th>
+                        <th>Aadhar Number</th>
+                        <th>Operation Type</th>
+                        <th>Amount Claimed (INR)</th>
+                        <th>Place</th>
+                        <th>Status</th>
+                        <th>Reject Reason</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                        <tr>
+                            <td>{{ claim.claim_id }}</td>
+                            <td>{{ claim.patient_id }}</td>
+                            <td>{{ claim.aadhar_number }}</td>
+                            <td>{{ claim.operation_type }}</td>
+                            <td>{{ claim.amount_claimed | format_number }}</td>
+                            <td>{{ claim.place }}</td>
+                            <td>{{ claim.status }}</td>
+                            <td>{{ claim.reject_reason or 'N/A' }}</td>
+                            <td>
+                                {% if claim.status == 'Approved' %}
+                                    <a href="{{ url_for('download_bill', claim_id=claim.claim_id) }}" class="button">Download Bill</a>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No claims found for this hospital.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
+```

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Claim Statistics - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        #filterInput {
+            margin: 10px 0;
+            padding: 8px;
+            width: 200px;
+        }
+        .debug {
+            background-color: #f8f8f8;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script>
+        function filterTable() {
+            let input = document.getElementById('filterInput').value.toLowerCase();
+            let table = document.getElementById('hospitalTable');
+            let rows = table ? table.getElementsByTagName('tr') : [];
+            for (let i = 1; i < rows.length; i++) {
+                let hospitalId = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                rows[i].style.display = hospitalId.includes(input) ? '' : 'none';
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Hospital Claim Statistics</h1>
+        <nav>
+            <a href="{{ url_for('treasurer') }}">Back to Treasurer Dashboard</a>
+            <a href="{{ url_for('treasurer_manage_claims') }}">Manage Claims</a>
+            <a href="{{ url_for('treasurer_claim_stats') }}">Overall Claim Statistics</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h2>Per-Hospital Claim Statistics</h2>
+        <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Filter by Hospital ID">
+        {% if hospital_stats %}
+        <table id="hospitalTable">
+            <tr>
+                <th>Hospital ID</th>
+                <th>Hospital Name</th>
+                <th>Total Claims</th>
+                <th>Approved Claims</th>
+                <th>Pending Claims</th>
+                <th>Rejected Claims</th>
+                <th>Total Amount Claimed (INR)</th>
+            </tr>
+            {% for stat in hospital_stats %}
+                <tr>
+                    <td>{{ stat.hospital_id }}</td>
+                    <td>{{ stat.hospital_name }}</td>
+                    <td>{{ stat.total_claims }}</td>
+                    <td>{{ stat.approved_claims }}</td>
+                    <td>{{ stat.pending_claims }}</td>
+                    <td>{{ stat.rejected_claims }}</td>
+                    <td>{{ stat.total_amount|float|format_number }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No hospital statistics available. Please ensure hospitals are registered in the database.</p>
+        {% endif %}
+    </main>
+</body>
+</html>

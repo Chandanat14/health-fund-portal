@@ -1,0 +1,94 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html>
+<head>
+    <title>Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>HEALTH FUND PORTAL</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        </nav>
+    </header>
+    <main>
+        <h2>News</h2>
+        <div class="news">
+            {% for item in news %}
+                <div class="news-item">
+                    <h3>{{ item[1] }}</h3>
+                    <p>{{ item[2] }}</p>
+                    <p><em>{{ item[4] }}</em></p>
+                </div>
+            {% endfor %}
+        </div>
+        <h2>Facts</h2>
+        <div class="facts">
+            {% for item in facts %}
+                <div class="fact-item">
+                    <h3>{{ item[1] }}</h3>
+                    <p>{{ item[2] }}</p>
+                    <p><em>{{ item[4] }}</em></p>
+                </div>
+            {% endfor %}
+        </div>
+        <h2>Hospital Claims</h2>
+        <table>
+            <tr>
+                <th>Hospital Name</th>
+                <th>Total Claims</th>
+                <th>Approved Claims</th>
+                <th>Rejected Claims</th>
+            </tr>
+            {% for hospital in hospitals %}
+                <tr>
+                    <td>{{ hospital[0] }}</td>
+                    <td>{{ hospital[1] }}</td>
+                    <td>{{ hospital[2] }}</td>
+                    <td>{{ hospital[3] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </main>
+</body>
+</html>

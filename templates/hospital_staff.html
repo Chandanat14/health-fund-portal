@@ -1,0 +1,75 @@
+
+<script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+    }
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Staff Dashboard - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Hospital Staff Dashboard</h1>
+        <nav>
+            <a href="{{ url_for('hospital_claim_status') }}">View Claim Status</a>
+            <a href="{{ url_for('hospital_change_password') }}">Change Password</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h2>Submit New Claim</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="patient_id">Patient ID:</label>
+            <input type="text" id="patient_id" name="patient_id" required>
+            <label for="aadhar_number">Aadhar Number:</label>
+            <input type="text" id="aadhar_number" name="aadhar_number" pattern="\d{12}" required>
+            <label for="operation_type">Operation Type:</label>
+            <input type="text" id="operation_type" name="operation_type" required>
+            <label for="amount_claimed">Amount Claimed (INR):</label>
+            <input type="number" id="amount_claimed" name="amount_claimed" step="0.01" required>
+            <label for="place">Place of Treatment:</label>
+            <input type="text" id="place" name="place" required>
+            <label for="bill_pdf">Bill PDF:</label>
+            <input type="file" id="bill_pdf" name="bill_pdf" accept=".pdf" required>
+            <button type="submit">Submit Claim</button>
+        </form>
+    </main>
+</body>
+</html>

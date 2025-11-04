@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Socio-Economic Data - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Health Fund Patrol</h1>
+        <nav>
+            <a href="{{ url_for('socio_economic_view') }}">View Socio-Economic Data</a>
+            <a href="{{ url_for('socio_economic_admin') }}">Socio-Economic Admin Dashboard</a>
+            <a href="{{ url_for('socio_economic_manage') }}">Add New Person</a>
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Add Socio-Economic Data</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" enctype="multipart/form-data" class="form">
+            <div class="form-group">
+                <label for="aadhar_number">Aadhar Number:</label>
+                <input type="text" id="aadhar_number" name="aadhar_number" pattern="\d{12}" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea id="address" name="address" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="date_of_birth">Date of Birth:</label>
+                <input type="date" id="date_of_birth" name="date_of_birth" required>
+            </div>
+            <div class="form-group">
+                <label for="annual_income">Annual Income:</label>
+                <input type="number" id="annual_income" name="annual_income" required>
+            </div>
+            <div class="form-group">
+                <label for="blood_group">Blood Group:</label>
+                <select id="blood_group" name="blood_group" required>
+                    <option value="" disabled selected>Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="spouse_name">Spouse Name:</label>
+                <input type="text" id="spouse_name" name="spouse_name">
+            </div>
+            <div class="form-group">
+                <label for="spouse_aadhar_number">Spouse Aadhar Number:</label>
+                <input type="text" id="spouse_aadhar_number" name="spouse_aadhar_number" pattern="\d{12}">
+            </div>
+            <div class="form-group">
+                <label for="spouse_date_of_birth">Spouse Date of Birth:</label>
+                <input type="date" id="spouse_date_of_birth" name="spouse_date_of_birth">
+            </div>
+            <div class="form-group">
+                <label for="spouse_blood_group">Spouse Blood Group:</label>
+                <select id="spouse_blood_group" name="spouse_blood_group">
+                    <option value="" selected>Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="children_count">Number of Children:</label>
+                <input type="number" id="children_count" name="children_count" value="0" min="0" required onchange="generateChildFields(this.value)">
+            </div>
+            <div class="form-group" id="children-details"></div>
+            <div class="form-group">
+                <label for="photo">Photo:</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+            </div>
+            <button type="submit" class="button">Add Person</button>
+        </form>
+        <a href="{{ url_for('socio_economic_admin') }}" class="button button-secondary">Back to Dashboard</a>
+    </main>
+    <script>
+        function generateChildFields(count) {
+            const container = document.getElementById('children-details');
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.className = 'child-entry';
+                div.innerHTML = `
+                    <label>Child ${i + 1} Name:</label>
+                    <input type="text" name="child_name_${i}" required>
+                    <label>Child ${i + 1} Aadhar Number:</label>
+                    <input type="text" name="child_aadhar_${i}" pattern="\\d{12}" required>
+                    <label>Child ${i + 1} Date of Birth:</label>
+                    <input type="date" name="child_dob_${i}" required>
+                    <label>Child ${i + 1} Blood Group:</label>
+                    <select name="child_blood_group_${i}" required>
+                        <option value="" disabled selected>Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                `;
+                container.appendChild(div);
+            }
+        }
+    </script>
+</body>
+</html>

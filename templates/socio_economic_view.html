@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Socio-Economic Data - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>View Socio-Economic Data</h1>
+        <nav>
+            <a href="{{ url_for('socio_economic_admin') }}">Back to Socio-Economic Admin Dashboard</a>
+            <a href="{{ url_for('socio_economic_manage') }}">Manage Socio-Economic Data</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h2>People</h2>
+        <table>
+            <tr>
+                <th>Aadhar Number</th>
+                <th>Name</th>
+                <th>Annual Income (INR)</th>
+                <th>Children Count</th>
+                <th>Photo</th>
+                <th>Action</th>
+            </tr>
+            {% for person in people %}
+                <tr>
+                    <td>{{ person.aadhar_number }}</td>
+                    <td>{{ person.name }}</td>
+                    <td>{{ person.annual_income|float|format_number }}</td>
+                    <td>{{ person.children_count }}</td>
+                    <td>
+                        {% if person.photo_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + person.photo_path) }}" width="50" alt="Photo">
+                        {% else %}
+                            No Photo
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('socio_economic_edit', aadhar_number=person.aadhar_number) }}">Edit</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </main>
+    </body>
+</html>

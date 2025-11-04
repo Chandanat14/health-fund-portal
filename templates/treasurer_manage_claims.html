@@ -1,0 +1,102 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasurer Manage Claims - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function disableButton(button) {
+            button.disabled = true;
+            button.value = 'Processing...';
+            return true;
+        }
+        function validateRejectForm(form) {
+            var reason = form.querySelector('input[name="reject_reason"]').value.trim();
+            if (!reason) {
+                alert('Please provide a reject reason');
+                return false;
+            }
+            return disableButton(form.querySelector('input[type="submit"]'));
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Health Fund Patrol</h1>
+        <nav>
+            <a href="{{ url_for('treasurer') }}">Register Hospital</a>
+            <a href="{{ url_for('treasurer_manage_claims') }}">Manage Claims</a>
+            <a href="{{ url_for('treasurer_claim_stats') }}">Claim Stats</a>
+            <a href="{{ url_for('treasurer_hospital_stats') }}">Hospital Stats</a>
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Manage Pending Claims</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% if pending_claims %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Hospital ID</th>
+                        <th>Patient ID</th>
+                        <th>Aadhar Number</th>
+                        <th>Operation Type</th>
+                        <th>Amount Claimed (INR)</th>
+                        <th>Place</th>
+                        <th>Submission Date</th>
+                        <th>Bill PDF</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in pending_claims %}
+                        <tr>
+                            <td>{{ claim.claim_id }}</td>
+                            <td>{{ claim.hospital_id }}</td>
+                            <td>{{ claim.patient_id }}</td>
+                            <td>{{ claim.aadhar_number }}</td>
+                            <td>{{ claim.operation_type }}</td>
+                            <td>{{ claim.amount_claimed|float|format_number }}</td>
+                            <td>{{ claim.place }}</td>
+                            <td>{{ claim.submission_date }}</td>
+                            <td>
+                                {% if claim.bill_pdf_path %}
+                                    <a href="{{ url_for('static', filename='uploads/' + claim.bill_pdf_path) }}" target="_blank" class="button">View PDF</a>
+                                {% else %}
+                                    No PDF
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('treasurer_manage_claims') }}" method="POST" onsubmit="return disableButton(this.querySelector('input[type=submit]'))">
+                                    <input type="hidden" name="claim_id" value="{{ claim.claim_id }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <input type="submit" value="Approve" class="button" onclick="return confirm('Approve this claim?');">
+                                </form>
+                                <form action="{{ url_for('treasurer_manage_claims') }}" method="POST" onsubmit="return validateRejectForm(this)">
+                                    <input type="hidden" name="claim_id" value="{{ claim.claim_id }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <input type="text" name="reject_reason" placeholder="Reject reason" style="width: 150px;">
+                                    <input type="submit" value="Reject" class="button" onclick="return confirm('Reject this claim?');">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No pending claims available.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
+```

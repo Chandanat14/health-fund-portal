@@ -1,0 +1,28 @@
+<xaiArtifact artifact_id="3ba478b0-329d-4b72-a498-6d79cae2a344" artifact_version_id="07e2f491-bd84-4319-a50e-3e506b07dc94" title="logout.html" contentType="text/html">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Auto-redirect to home page after 2 seconds
+        setTimeout(function() {
+            window.location.href = "{{ url_for('home') }}";
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <p>You will be redirected to the home page shortly...</p>
+    </div>
+</body>
+</html>

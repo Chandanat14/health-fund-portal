@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasurer Claim Statistics - Health Fund Patrol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Health Fund Patrol</h1>
+        <nav>
+            <a href="{{ url_for('treasurer') }}">Register Hospital</a>
+            <a href="{{ url_for('treasurer_manage_claims') }}">Manage Claims</a>
+            <a href="{{ url_for('treasurer_claim_stats') }}">Claim Stats</a>
+            <a href="{{ url_for('treasurer_hospital_stats') }}">Hospital Stats</a>
+            <a href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Claim Statistics</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <h2>Overall Statistics</h2>
+        {% if overall_stats.total > 0 %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Total Claims</th>
+                        <th>Approved Claims</th>
+                        <th>Pending Claims</th>
+                        <th>Rejected Claims</th>
+                        <th>Total Approved Amount (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ overall_stats.total }}</td>
+                        <td>{{ overall_stats.approved }}</td>
+                        <td>{{ overall_stats.pending }}</td>
+                        <td>{{ overall_stats.rejected }}</td>
+                        <td>{{ overall_stats.total_amount|float|format_number }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <p>No claims data available.</p>
+        {% endif %}
+        
+        <h2>Hospital-wise Statistics</h2>
+        {% if hospital_stats %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hospital ID</th>
+                        <th>Hospital Name</th>
+                        <th>Total Claims</th>
+                        <th>Approved Claims</th>
+                        <th>Pending Claims</th>
+                        <th>Rejected Claims</th>
+                        <th>Total Claimed Amount (INR)</th>
+                        <th>Total Approved Amount (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in hospital_stats %}
+                        <tr>
+                            <td>{{ stat.hospital_id }}</td>
+                            <td>{{ stat.hospital_name }}</td>
+                            <td>{{ stat.total_claims }}</td>
+                            <td>{{ stat.approved_claims }}</td>
+                            <td>{{ stat.pending_claims }}</td>
+                            <td>{{ stat.rejected_claims }}</td>
+                            <td>{{ stat.total_amount|float|format_number }}</td>
+                            <td>{{ stat.total_approved_amount|float|format_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hospital claim data available.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
